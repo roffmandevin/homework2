@@ -141,34 +141,16 @@ class MLPClassifierDeep(nn.Module):
         return logits
 
 class MLPClassifierDeepResidual(nn.Module):
-    def __init__(
-        self,
-        h: int = 64,
-        w: int = 64,
-        num_classes: int = 6, hidden_dim: int = 128, num_layers: int = 3
-    ):
-        """
-        Args:
-            h: int, height of image
-            w: int, width of image
-            num_classes: int
-
-        Hint - you can add more arguments to the constructor such as:
-            hidden_dim: int, size of hidden layers
-            num_layers: int, number of hidden layers
-        """
+    def __init__(self, h: int = 64, w: int = 64, num_classes: int = 6, hidden_dim: int = 128, num_layers: int = 3):
         super().__init__()
         self.flatten = nn.Flatten()
         input_dim = h * w * 3  # For RGB images
 
-        # Create a list of layers
-        layers = [nn.Linear(input_dim, hidden_dim), nn.ReLU()]
-        for _ in range(num_layers - 1):
-            layers.extend([nn.Linear(hidden_dim, hidden_dim), nn.ReLU()])
-        layers.append(nn.Linear(hidden_dim, num_classes))
-
-        # Register the layers as a Sequential model
-        self.model = nn.Sequential(*layers)
+        # Initial layer
+        self.fc_in = nn.Linear(input_dim, hidden_dim)
+        self.hidden_layers = nn.ModuleList([nn.Linear(hidden_dim, hidden_dim) for _ in range(num_layers)])
+        self.fc_out = nn.Linear(hidden_dim, num_classes)
+        self.relu = nn.ReLU()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -179,7 +161,12 @@ class MLPClassifierDeepResidual(nn.Module):
             tensor (b, num_classes) logits
         """
         x = self.flatten(x)
-        logits = self.model(x)
+        x = self.relu(self.fc_in(x))
+        for layer in self.hidden_layers:
+            residual = x
+            x = self.relu(layer(x))
+            x += residual  # Residual connection
+        logits = self.fc_out(x)
         return logits
 
 model_factory = {
