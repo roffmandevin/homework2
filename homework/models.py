@@ -161,11 +161,11 @@ class MLPClassifierDeepResidual(nn.Module):
             tensor (b, num_classes) logits
         """
         x = self.flatten(x)
-        x = self.relu(self.fc_in(x))
+        x = nn.functional.relu(self.fc_in(x), inplace=False)  # Use functional ReLU with inplace=False
         for layer in self.hidden_layers:
             residual = x
-            x = self.relu(layer(x))
-            x += residual  # Residual connection
+            x = nn.functional.relu(layer(x), inplace=False)  # Use functional ReLU with inplace=False
+            x = x + residual  # Out-of-place addition
         logits = self.fc_out(x)
         return logits
 

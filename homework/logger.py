@@ -34,7 +34,7 @@ def test_logging(logger: tb.SummaryWriter):
             # Save additional metrics to be averaged for training accuracy
             metrics["train_acc"].extend(dummy_train_accuracy.tolist())
 
-        global_step += 1
+            global_step += 1
 
         avg_train_accuracy = torch.tensor(metrics["train_acc"]).mean()
         logger.add_scalar('train_accuracy', avg_train_accuracy, epoch)
@@ -47,8 +47,8 @@ def test_logging(logger: tb.SummaryWriter):
             metrics["val_acc"].extend(dummy_validation_accuracy.tolist())
 
             # Log average val_accuracy after each epoch
-            avg_val_accuracy = torch.tensor(metrics["val_acc"]).mean()
-            logger.add_scalar('val_accuracy', avg_val_accuracy, epoch)
+        avg_val_accuracy = torch.tensor(metrics["val_acc"]).mean()
+        logger.add_scalar('val_accuracy', avg_val_accuracy, epoch)
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
