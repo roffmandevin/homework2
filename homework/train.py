@@ -60,7 +60,16 @@ def train(
             img, label = img.to(device), label.to(device)
 
             # TODO: implement training step
-            raise NotImplementedError("Training step not implemented")
+            optimizer.zero_grad()  # Clear previous gradients
+            logits = model(img)  # Forward pass
+            loss = loss_func(logits, label)  # Compute loss
+            loss.backward()  # Backward pass
+            optimizer.step()  # Update weights
+
+            # Compute training accuracy
+            _, predicted = torch.max(logits, dim=1)
+            train_acc = (predicted == label).float().mean()
+            metrics["train_acc"].append(train_acc.item())
 
             global_step += 1
 
@@ -72,7 +81,10 @@ def train(
                 img, label = img.to(device), label.to(device)
 
                 # TODO: compute validation accuracy
-                raise NotImplementedError("Validation accuracy not implemented")
+                logits = model(img)
+                _, predicted = torch.max(logits, dim=1)
+                val_acc = (predicted == label).float().mean()
+                metrics["val_acc"].append(val_acc.item())
 
         # log average train and val accuracy to tensorboard
         epoch_train_acc = torch.as_tensor(metrics["train_acc"]).mean()
